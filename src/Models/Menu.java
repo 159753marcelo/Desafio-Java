@@ -76,7 +76,7 @@ public class Menu {
                 double taxa = conversor.pegaTaxaConversao(this.getMoedaBase(), this.getMoedaAlvo());
                 System.out.println("O valor de " + this.getMoedaBase() + " " + valor + " em " + this.getMoedaAlvo() +
                         " é de: " + conversor.converteValor(valor, taxa));
-            } catch (InputMismatchException e) {
+            } catch (NumberFormatException | InputMismatchException e) {
                 System.out.println("Valor inválido, tente novamente");
             }
         } else {
