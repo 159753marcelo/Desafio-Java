@@ -5,8 +5,8 @@ package Models;
 
 import java.io.IOException;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 public class Menu {
     private boolean seguir = true;
@@ -14,15 +14,16 @@ public class Menu {
     private String moedaAlvo;
     private String principal = """
             ╔═══════════════════════════════════════════════════════╗
+            ║                 $ $ $ $ $ $ $ $ $ $                   ║
             ║=-=-=-=-=-=-=-=- Conversor de Moedas -=-=-=-=-=-=-=-=-=║
             ║                 $ $ $ $ $ $ $ $ $ $                   ║
             ╠═══════════════════════════════════════════════════════╣
             ║ 1) Dólar =>> Peso argentino                           ║
             ║ 2) Peso Argentino =>> Dólar                           ║
-            ║ 3) Dólar Americano =>> Real brasileiro                ║
+            ║ 3) Dólar =>> Real brasileiro                          ║
             ║ 4) Real brasileiro =>> Dólar                          ║
             ║ 5) Dólar =>> Peso Colombiano                          ║
-            ║ 6) Peso Colombiano => >Dólar                          ║
+            ║ 6) Peso Colombiano =>> Dólar                          ║
             ║ 7) Conversão customizada                              ║
             ║ 8) Sair                                               ║
             ╚═══════════════════════════════════════════════════════╝
@@ -30,6 +31,7 @@ public class Menu {
 
     private String custom = """
             ╔═══════════════════════════════════════════════════════╗
+            ║                 $ $ $ $ $ $ $ $ $ $                   ║
             ║=-=-=-=-=-=-=-=- Conversor de Moedas -=-=-=-=-=-=-=-=-=║
             ║                 $ $ $ $ $ $ $ $ $ $                   ║
             ╠═══════════════════════════════════════════════════════╣
@@ -39,98 +41,84 @@ public class Menu {
             ║ 4) Peso Colombiano                                    ║
             ║ 5) Peso Mexicano                                      ║
             ║ 6) Sol Peruano                                        ║
-            ║ 7) Dólar Americano                                    ║
+            ║ 7) Dólar                                              ║
             ║ 8) Euro                                               ║
             ║ 9) Voltar                                             ║
             ║ 10) Sair                                              ║
             ╚═══════════════════════════════════════════════════════╝
             """;
 
-    private String askChoice = """
-            ╔═══════════════════════════════════════════════════════╗
-            ║ Digite a opção desejada:                              ║
-            ╚═══════════════════════════════════════════════════════╝
-            """;
+//    private String askChoice = """
+//            ╔═══════════════════════════════════════════════════════╗
+//            ║ Digite a opção desejada:                              ║
+//            ╚═══════════════════════════════════════════════════════╝
+//            """;
 
-
-    private int userChoice;
-
-    public static void firstMenu(String userChoice, Menu menu, Scanner sc, Conversor conversor) throws IOException, InterruptedException {
+    public void firstMenu(Scanner sc, Conversor conversor) throws IOException, InterruptedException {
+        this.printMenuPrincipal();
+        System.out.println("Digite a opção desejada");
+        String userChoice = sc.nextLine();
+        this.opcaoMenuPrincipal(userChoice);
         if (userChoice.equals("8")) {
             System.out.println("Saindo do Conversor de Moedas. Até logo!");
-            menu.setSeguir(false);
+            this.setSeguir(false);
         } else if (userChoice.equals("7")) {
-            menu.printMenuCustom();
+            this.printMenuCustom();
             System.out.println("Digite a opção da moeda que deseja converter");
             String userCustom = sc.nextLine();
-            String moedaBase = menu.opcaoMenuCustom(userCustom);
-            firstCustomMenu(userCustom, menu, sc, conversor, moedaBase);
-        } else if (Stream.of("1", "2", "3", "4", "5", "6").anyMatch(userChoice::equals)) {
+            String moedaBase = this.opcaoMenuCustom(userCustom);
+            firstCustomMenu(userCustom, sc, conversor, moedaBase);
+        } else if (List.of("1", "2", "3", "4", "5", "6").contains(userChoice)) {
             System.out.println("Digite o valor a ser convertido:");
+            String valorString = sc.nextLine();
             try {
-                double valor = sc.nextDouble();
-                double taxa = conversor.pegaTaxaConversao(menu.getMoedaBase(), menu.getMoedaAlvo());
-                System.out.println("O valor de " + menu.getMoedaBase() + " " + valor + " em " + menu.getMoedaAlvo() +
+                double valor = Double.parseDouble(valorString);
+                double taxa = conversor.pegaTaxaConversao(this.getMoedaBase(), this.getMoedaAlvo());
+                System.out.println("O valor de " + this.getMoedaBase() + " " + valor + " em " + this.getMoedaAlvo() +
                         " é de: " + conversor.converteValor(valor, taxa));
-                userChoice = "";
-                menu.printMenuPrincipal();
-                System.out.println("Digite a opção desejada");
             } catch (InputMismatchException e) {
-                userChoice = "";
                 System.out.println("Valor inválido, tente novamente");
             }
+        } else {
+            System.out.println("Opção inválida, tente novamente.");
         }
     }
 
-    private static void firstCustomMenu(String userCustom, Menu menu, Scanner sc, Conversor conversor, String moedaBase) throws IOException, InterruptedException {
-        String userChoice;
+    private void firstCustomMenu(String userCustom, Scanner sc, Conversor conversor, String moedaBase) throws IOException, InterruptedException {
         if (userCustom.equals("10")) {
             System.out.println("Saindo do Conversor de Moedas. Até logo!");
-            menu.setSeguir(false);
+            this.setSeguir(false);
         } else if (userCustom.equals("9")) {
             System.out.println("Retornando ao menu principal");
-            menu.printMenuPrincipal();
-            userChoice = "";
-            userCustom = "";
-            System.out.println("Digite a opção desejada");
-        } else if (Stream.of("1", "2", "3", "4", "5", "6", "7", "8").anyMatch(userCustom::equals)) {
+        } else if (List.of("1", "2", "3", "4", "5", "6", "7", "8").contains(userCustom)) {
             System.out.println("Digite a opção da moeda para qual converter");
             userCustom = sc.nextLine();
-            String moedaAlvo = menu.opcaoMenuCustom(userCustom);
-            secondCustomMenu(userCustom, menu, sc, conversor, moedaBase, moedaAlvo);
+            String moedaAlvo = this.opcaoMenuCustom(userCustom);
+            secondCustomMenu(userCustom, sc, conversor, moedaBase, moedaAlvo);
         } else {
-            userCustom = "";
             System.out.println("Opção inválida, tente novamente.");
-            menu.printMenuPrincipal();
-            System.out.println("Digite a opção desejada");
         }
     }
 
-    private static void secondCustomMenu(String userCustom, Menu menu, Scanner sc, Conversor conversor, String moedaBase, String moedaAlvo) throws IOException, InterruptedException {
-        String userChoice;
+    private void secondCustomMenu(String userCustom, Scanner sc, Conversor conversor, String moedaBase, String moedaAlvo) throws IOException, InterruptedException {
         if (userCustom.equals("10")) {
             System.out.println("Saindo do Conversor de Moedas. Até logo!");
-            menu.setSeguir(false);
+            this.setSeguir(false);
         } else if (userCustom.equals("9")) {
             System.out.println("Retornando ao menu principal");
-            menu.printMenuPrincipal();
-            userChoice = "";
-            userCustom = "";
-            System.out.println("Digite a opção desejada");
-        } else {
+        } else if (List.of("1", "2", "3", "4", "5", "6", "7", "8").contains(userCustom)) {
             System.out.println("Digite o valor a ser convertido:");
+            String valorString = sc.nextLine();
             try {
-                double valor = sc.nextDouble();
+                double valor = Double.parseDouble(valorString);
                 double taxa = conversor.pegaTaxaConversao(moedaBase, moedaAlvo);
-                System.out.println("O valor de " + moedaBase + " " + valor + " em " + moedaBase +
+                System.out.println("O valor de " + moedaBase + " " + valor + " em " + moedaAlvo +
                         " é de: " + conversor.converteValor(valor, taxa));
-                menu.printMenuPrincipal();
-                System.out.println("Digite a opção desejada");
-            } catch (InputMismatchException e) {
-                userCustom = "";
+            } catch (NumberFormatException | InputMismatchException e) {
                 System.out.println("Valor inválido, tente novamente");
-                menu.printMenuPrincipal();
             }
+        } else {
+            System.out.println("Opção inválida, tente novamente.");
         }
     }
 
@@ -218,28 +206,12 @@ public class Menu {
         System.out.println(this.getCustom());
     }
 
-    public void printMenuAsk() {
-        System.out.println(this.getAskChoice());
-    }
-
     public String getPrincipal() {
         return principal;
     }
 
     public String getCustom() {
         return custom;
-    }
-
-    public String getAskChoice() {
-        return askChoice;
-    }
-
-    public int getUserChoice() {
-        return userChoice;
-    }
-
-    public void setUserChoice(int userChoice) {
-        this.userChoice = userChoice;
     }
 
     public boolean isSeguir() {
