@@ -6,10 +6,10 @@ public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         Menu menu = new Menu();
 
-
         do {
             menu.firstMenu();
         } while (menu.isSeguir());
+
         System.out.println(menu.getSplash());
         System.out.println(menu.getCredits());
 

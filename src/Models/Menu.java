@@ -18,7 +18,7 @@ public class Menu {
     private String moedaBase;
     private String moedaAlvo;
     private SimpleDateFormat formatDate = new SimpleDateFormat("HH:mm:ss - dd/MM/yyyy");
-    Timestamp data = new Timestamp(System.currentTimeMillis());
+
     ArrayList<ConversionData> conversoes = new ArrayList<>();
 
     private String principal = """
@@ -82,17 +82,20 @@ public class Menu {
             firstCustomMenu(userCustom, moedaBase);
         } else if (userChoice.equals("8")) {
             SimpleDateFormat diaHora = new SimpleDateFormat("dd-MM-yyyy-HH-mm");
+            Timestamp data = new Timestamp(System.currentTimeMillis());
             String momento = diaHora.format(data);
-            try (FileWriter writer = new FileWriter("hist" + momento + ".txt")) {
+            try (FileWriter writer = new FileWriter("hist_" + momento + ".txt")) {
                 for (ConversionData conversionData : conversoes) {
-                    String hist = (" | Moeda original: " + conversionData.getMoedaBase() +
+                    String hist =
+                            (" | Moeda original: " + conversionData.getMoedaBase() +
                             " | Moeda a ser convertida: " + conversionData.getMoedaAlvo() + "\n" +
                             " | Valor original: " + conversionData.getValor() + "\n" +
                             " | Valor convertido: " + (conversionData.getValor() * conversionData.getTaxa()) +  "\n" +
                             " | Taxa de conversão: " + conversionData.getTaxa() + "\n" +
-                            " | Conversão realizada em: " + formatDate.format(data) + "\n" + "\n");
+                            " | Conversão realizada em: " + conversionData.getHora() + "\n" + "\n");
                     System.out.println(hist);
                     writer.write(hist);
+                    System.out.println("Histórico salvo no arquivo: " + "hist_" + momento + ".txt\n");
                 }
             } catch (IOException e) {
                 System.out.println("Erro ao escrever o arquivo.");
@@ -101,11 +104,13 @@ public class Menu {
             System.out.println("Digite o valor a ser convertido:");
             String valorString = sc.nextLine();
             try {
+                Timestamp data = new Timestamp(System.currentTimeMillis());
                 double valor = Double.parseDouble(valorString);
                 double taxa = conversor.pegaTaxaConversao(this.getMoedaBase(), this.getMoedaAlvo());
-                conversoes.add(new ConversionData(this.getMoedaBase(), this.getMoedaAlvo(), taxa, valor));
+                String hora = formatDate.format(data);
+                conversoes.add(new ConversionData(this.getMoedaBase(), this.getMoedaAlvo(), taxa, valor, hora));
                 System.out.println("O valor de " + this.getMoedaBase() + " " + valor + " em " + this.getMoedaAlvo() +
-                        " é de: " + conversor.converteValor(valor, taxa) + ". Horário de conversão: " + formatDate.format(data));
+                        " é de: " + conversor.converteValor(valor, taxa) + ". Horário de conversão: " + hora);
             } catch (NumberFormatException | InputMismatchException e) {
                 System.out.println("Valor inválido, tente novamente");
             }
@@ -141,9 +146,11 @@ public class Menu {
             System.out.println("Digite o valor a ser convertido:");
             String valorString = sc.nextLine();
             try {
+                Timestamp data = new Timestamp(System.currentTimeMillis());
                 double valor = Double.parseDouble(valorString);
                 double taxa = conversor.pegaTaxaConversao(moedaBase, moedaAlvo);
-                conversoes.add(new ConversionData(moedaBase, moedaAlvo, taxa, valor));
+                String hora = formatDate.format(data);
+                conversoes.add(new ConversionData(moedaBase, moedaAlvo, taxa, valor, hora));
                 System.out.println("O valor de " + moedaBase + " " + valor + " em " + moedaAlvo +
                         " é de: " + conversor.converteValor(valor, taxa) + ". Horário de conversão: " + formatDate.format(data));
             } catch (NumberFormatException | InputMismatchException e) {
