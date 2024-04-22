@@ -3,15 +3,24 @@ package Models;
 // ═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟
 // ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
+    Scanner sc = new Scanner(System.in);
     private boolean seguir = true;
     private String moedaBase;
     private String moedaAlvo;
+    private SimpleDateFormat formatDate = new SimpleDateFormat("HH:mm:ss - dd/MM/yyyy");
+    Timestamp data = new Timestamp(System.currentTimeMillis());
+    ArrayList<ConversionData> conversoes = new ArrayList<>();
+
     private String principal = """
             ╔═══════════════════════════════════════════════════════╗
             ║                 $ $ $ $ $ $ $ $ $ $                   ║
@@ -25,7 +34,8 @@ public class Menu {
             ║ 5) Dólar =>> Peso Colombiano                          ║
             ║ 6) Peso Colombiano =>> Dólar                          ║
             ║ 7) Conversão customizada                              ║
-            ║ 8) Sair                                               ║
+            ║ 8) Visualizar e salvar histórico                      ║
+            ║ 9) Sair                                               ║
             ╚═══════════════════════════════════════════════════════╝
             """;
 
@@ -54,12 +64,14 @@ public class Menu {
 //            ╚═══════════════════════════════════════════════════════╝
 //            """;
 
-    public void firstMenu(Scanner sc, Conversor conversor) throws IOException, InterruptedException {
+
+    public void firstMenu() throws IOException, InterruptedException {
+        Conversor conversor = new Conversor();
         this.printMenuPrincipal();
         System.out.println("Digite a opção desejada");
         String userChoice = sc.nextLine();
         this.opcaoMenuPrincipal(userChoice);
-        if (userChoice.equals("8")) {
+        if (userChoice.equals("9")) {
             System.out.println("Saindo do Conversor de Moedas. Até logo!");
             this.setSeguir(false);
         } else if (userChoice.equals("7")) {
@@ -67,15 +79,33 @@ public class Menu {
             System.out.println("Digite a opção da moeda que deseja converter");
             String userCustom = sc.nextLine();
             String moedaBase = this.opcaoMenuCustom(userCustom);
-            firstCustomMenu(userCustom, sc, conversor, moedaBase);
+            firstCustomMenu(userCustom, moedaBase);
+        } else if (userChoice.equals("8")) {
+            SimpleDateFormat diaHora = new SimpleDateFormat("dd-MM-yyyy-HH-mm");
+            String momento = diaHora.format(data);
+            try (FileWriter writer = new FileWriter("hist" + momento + ".txt")) {
+                for (ConversionData conversionData : conversoes) {
+                    String hist = (" | Moeda original: " + conversionData.getMoedaBase() +
+                            " | Moeda a ser convertida: " + conversionData.getMoedaAlvo() + "\n" +
+                            " | Valor original: " + conversionData.getValor() + "\n" +
+                            " | Valor convertido: " + (conversionData.getValor() * conversionData.getTaxa()) +  "\n" +
+                            " | Taxa de conversão: " + conversionData.getTaxa() + "\n" +
+                            " | Conversão realizada em: " + formatDate.format(data) + "\n" + "\n");
+                    System.out.println(hist);
+                    writer.write(hist);
+                }
+            } catch (IOException e) {
+                System.out.println("Erro ao escrever o arquivo.");
+            }
         } else if (List.of("1", "2", "3", "4", "5", "6").contains(userChoice)) {
             System.out.println("Digite o valor a ser convertido:");
             String valorString = sc.nextLine();
             try {
                 double valor = Double.parseDouble(valorString);
                 double taxa = conversor.pegaTaxaConversao(this.getMoedaBase(), this.getMoedaAlvo());
+                conversoes.add(new ConversionData(this.getMoedaBase(), this.getMoedaAlvo(), taxa, valor));
                 System.out.println("O valor de " + this.getMoedaBase() + " " + valor + " em " + this.getMoedaAlvo() +
-                        " é de: " + conversor.converteValor(valor, taxa));
+                        " é de: " + conversor.converteValor(valor, taxa) + ". Horário de conversão: " + formatDate.format(data));
             } catch (NumberFormatException | InputMismatchException e) {
                 System.out.println("Valor inválido, tente novamente");
             }
@@ -84,7 +114,7 @@ public class Menu {
         }
     }
 
-    private void firstCustomMenu(String userCustom, Scanner sc, Conversor conversor, String moedaBase) throws IOException, InterruptedException {
+    private void firstCustomMenu(String userCustom, String moedaBase) throws IOException, InterruptedException {
         if (userCustom.equals("10")) {
             System.out.println("Saindo do Conversor de Moedas. Até logo!");
             this.setSeguir(false);
@@ -94,26 +124,28 @@ public class Menu {
             System.out.println("Digite a opção da moeda para qual converter");
             userCustom = sc.nextLine();
             String moedaAlvo = this.opcaoMenuCustom(userCustom);
-            secondCustomMenu(userCustom, sc, conversor, moedaBase, moedaAlvo);
+            secondCustomMenu(userCustom, moedaBase, moedaAlvo);
         } else {
             System.out.println("Opção inválida, tente novamente.");
         }
     }
 
-    private void secondCustomMenu(String userCustom, Scanner sc, Conversor conversor, String moedaBase, String moedaAlvo) throws IOException, InterruptedException {
+    private void secondCustomMenu(String userCustom, String moedaBase, String moedaAlvo) throws IOException, InterruptedException {
+        Conversor conversor = new Conversor();
         if (userCustom.equals("10")) {
             System.out.println("Saindo do Conversor de Moedas. Até logo!");
             this.setSeguir(false);
         } else if (userCustom.equals("9")) {
-            System.out.println("Retornando ao menu principal");
+            System.out.println("Retornando ao menu principal \n");
         } else if (List.of("1", "2", "3", "4", "5", "6", "7", "8").contains(userCustom)) {
             System.out.println("Digite o valor a ser convertido:");
             String valorString = sc.nextLine();
             try {
                 double valor = Double.parseDouble(valorString);
                 double taxa = conversor.pegaTaxaConversao(moedaBase, moedaAlvo);
+                conversoes.add(new ConversionData(moedaBase, moedaAlvo, taxa, valor));
                 System.out.println("O valor de " + moedaBase + " " + valor + " em " + moedaAlvo +
-                        " é de: " + conversor.converteValor(valor, taxa));
+                        " é de: " + conversor.converteValor(valor, taxa) + ". Horário de conversão: " + formatDate.format(data));
             } catch (NumberFormatException | InputMismatchException e) {
                 System.out.println("Valor inválido, tente novamente");
             }
@@ -238,4 +270,55 @@ public class Menu {
         this.moedaAlvo = moedaAlvo;
     }
 
+    private String splash = """
+             
+             ▄▄·        ▐ ▄  ▌ ▐·▄▄▄ .▄▄▄  .▄▄ ·       ▄▄▄ \s
+            ▐█ ▌▪▪     •█▌▐█▪█·█▌▀▄.▀·▀▄ █·▐█ ▀. ▪     ▀▄ █·
+            ██ ▄▄ ▄█▀▄ ▐█▐▐▌▐█▐█•▐▀▀▪▄▐▀▀▄ ▄▀▀▀█▄ ▄█▀▄ ▐▀▀▄\s
+            ▐███▌▐█▌.▐▌██▐█▌ ███ ▐█▄▄▌▐█•█▌▐█▄▪▐█▐█▌.▐▌▐█•█▌
+            ·▀▀▀  ▀█▄▀▪▀▀ █▪. ▀   ▀▀▀ .▀  ▀ ▀▀▀▀  ▀█▄▀▪.▀  ▀
+                            ·▄▄▄▄  ▄▄▄ .                   \s
+                            ██▪ ██ ▀▄.▀·                   \s
+                            ▐█· ▐█▌▐▀▀▪▄                   \s
+                            ██. ██ ▐█▄▄▌                   \s
+                            ▀▀▀▀▀•  ▀▀▀                    \s
+                • ▌ ▄ ·.       ▄▄▄ .·▄▄▄▄   ▄▄▄· .▄▄ ·     \s
+                ·██ ▐███▪▪     ▀▄.▀·██▪ ██ ▐█ ▀█ ▐█ ▀.     \s
+                ▐█ ▌▐▌▐█· ▄█▀▄ ▐▀▀▪▄▐█· ▐█▌▄█▀▀█ ▄▀▀▀█▄    \s
+                ██ ██▌▐█▌▐█▌.▐▌▐█▄▄▌██. ██ ▐█ ▪▐▌▐█▄▪▐█    \s
+                ▀▀  █▪▀▀▀ ▀█▄▀▪ ▀▀▀ ▀▀▀▀▀•  ▀  ▀  ▀▀▀▀     \s
+            """;
+
+    public String getSplash() {
+        return splash;
+    }
+
+    private String credits = """
+░█▀▄░█▀▀░█░█░█▀▀░█░░░█▀█░█▀█░█▀▀░█▀▄░░░█▀▄░█░█░░░░░░░░
+░█░█░█▀▀░▀▄▀░█▀▀░█░░░█░█░█▀▀░█▀▀░█░█░░░█▀▄░░█░░░░░░░░░
+░▀▀░░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀░▀░░░▀▀▀░▀▀░░░░▀▀░░░▀░░░░░░░░░
+░░░░░░░░░░░░░░░░░░░░░█▀▀░█▀█░▀█▀░█▀█░░░░░░░░░░░░░░░░░░
+░░░░░░░░░░░░░░░░░░░░░█░░░█▀█░░█░░█░█░░░░░░░░░░░░░░░░░░
+░░░░░░░░░░░░░░░░░░░░░▀▀▀░▀░▀░▀▀▀░▀▀▀░░░░░░░░░░░░░░░░░░
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█░░░█▀▀░▀█▀░▀█▀░█▀▀░░░░░░
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█░░░█▀▀░░█░░░█░░█▀▀░░░░░░
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▀▀▀░▀▀▀░▀▀▀░░▀░░▀▀▀░░░░░░
+            """;
+
+    private String credits2 = """
+            ╔╦╗┌─┐┬  ┬┌─┐┬  ┌─┐┌─┐┌─┐┌┬┐  ┌┐ ┬ ┬
+             ║║├┤ └┐┌┘├┤ │  │ │├─┘├┤  ││  ├┴┐└┬┘
+            ═╩╝└─┘ └┘ └─┘┴─┘└─┘┴  └─┘─┴┘  └─┘ ┴\s
+                  ╔═╗┌─┐┬┌─┐  ╦  ┌─┐┬┌┬┐┌─┐    \s
+                  ║  ├─┤││ │  ║  ├┤ │ │ ├┤     \s
+                  ╚═╝┴ ┴┴└─┘  ╩═╝└─┘┴ ┴ └─┘    \s
+            """;
+
+    public String getCredits() {
+        return credits;
+    }
+
+    public String getCredits2() {
+        return credits2;
+    }
 }
