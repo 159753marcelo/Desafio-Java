@@ -95,8 +95,8 @@ public class Menu {
                             " | Conversão realizada em: " + conversionData.getHora() + "\n" + "\n");
                     System.out.println(hist);
                     writer.write(hist);
-                    System.out.println("Histórico salvo no arquivo: " + "hist_" + momento + ".txt\n");
                 }
+                System.out.println("Histórico salvo no arquivo: " + "hist_" + momento + ".txt\n");
             } catch (IOException e) {
                 System.out.println("Erro ao escrever o arquivo.");
             }
