@@ -12,7 +12,7 @@ Projeto desenvolvido no programa ONE - Oracle Next Education realizado pela Alur
 
 ## Pré-requisitos
 
-* Para utilizar o Conversor de Moedas é necessário inserir uma APIKEY  da webAPI da no arquivo /src/Models/Conversor.java
+* Para utilizar o Conversor de Moedas é necessário inserir uma APIKEY da webAPI no arquivo /src/Models/Conversor.java
 * A API Key pode ser obtida em: https://www.exchangerate-api.com/
 
 
