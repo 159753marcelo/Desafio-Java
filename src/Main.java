@@ -10,8 +10,6 @@ public class Main {
             menu.firstMenu();
         } while (menu.isSeguir());
 
-        System.out.println(menu.getSplash());
-        System.out.println(menu.getCredits());
-
     }
 }
+
