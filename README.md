@@ -14,6 +14,7 @@ Projeto desenvolvido no programa ONE - Oracle Next Education realizado pela Alur
 
 * Para utilizar o Conversor de Moedas é necessário inserir uma APIKEY da webAPI no arquivo /src/Models/Conversor.java
 * A API Key pode ser obtida em: https://www.exchangerate-api.com/
+* Além disso, é necessário inserir manualmente a biblioteca Gson que pode ser encontrada em: https://mvnrepository.com/artifact/com.google.code.gson/gson/2.10.1
 
 
 ![Badge-Conversor](https://github.com/iacoleite/conversor-de-moedas/assets/154355940/10a47f81-5c0a-4caf-8827-4a9fd860f167)
